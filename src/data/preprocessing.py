@@ -19,7 +19,7 @@ class CustomDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.data)
 
-def get_dataloaders_skin(dataset_path):
+def get_dataloaders_skin(dataset_path, batch_size):
     dataset = datasets.ImageFolder(dataset_path)
     feature_extractor = AutoImageProcessor.from_pretrained("Anwarkh1/Skin_Cancer-Image_Classification", use_fast=True)
 
@@ -46,8 +46,8 @@ def get_dataloaders_skin(dataset_path):
     test_ds = CustomDataset(test_data, transform=transform_image)
 
     return (
-        DataLoader(train_ds, batch_size=8, shuffle=True),
-        DataLoader(val_ds, batch_size=8, shuffle=False),
-        DataLoader(test_ds, batch_size=8, shuffle=False),
+        DataLoader(train_ds, batch_size, shuffle=True),
+        DataLoader(val_ds, batch_size, shuffle=False),
+        DataLoader(test_ds, batch_size, shuffle=False),
         dataset
     )

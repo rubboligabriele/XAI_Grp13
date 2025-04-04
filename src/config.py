@@ -1,5 +1,3 @@
-from datetime import datetime
-
 NUM_EPOCHS = 10
 PATIENCE = 3
 BATCH_SIZE = 32
