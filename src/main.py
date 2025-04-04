@@ -5,7 +5,6 @@ from utils.plots import plot_loss, plot_confusion_matrix
 from config import *
 import os
 import torch
-from datetime import datetime
 import argparse
 
 parser = argparse.ArgumentParser(description="Train or evaluate skin cancer classification model")
@@ -64,8 +63,8 @@ else:
     model.load_state_dict(early_stopper.best_model_state)
 
     os.makedirs("saved_models", exist_ok=True)
-    torch.save(model.state_dict(), os.path.join(args.model_path, f"model_melanoma_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pth"))
-    print("Best model saved to saved_models.")
+    torch.save(model.state_dict(), os.path.join(args.model_path, args.model_filename))
+    print(f"Best model saved to {os.path.join(args.model_path, args.model_filename)}")
 
     # Plot training curves
     plot_loss(train_losses, val_losses)
