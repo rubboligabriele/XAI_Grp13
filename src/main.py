@@ -1,7 +1,7 @@
 from data.preprocessing import get_dataloaders_skin
 from model.cancer_model import create_skin_cancer_model
-from model.train_utils import train, evaluate, EarlyStopping
-from utils.plots import plot_loss, plot_confusion_matrix, plot_explainability_comparison
+from model.train_utils import *
+from utils.plots import *
 from config import *
 import os
 import torch
@@ -29,46 +29,25 @@ model, criterion, optimizer = create_skin_cancer_model(full_dataset_raw, args.le
 model_filename = args.model_filename
 
 if args.load_model:
-    model.load_state_dict(torch.load(os.path.join(args.model_path, model_filename), weights_only=True))
+    model.load_state_dict(torch.load(os.path.join(args.model_path, args.model_filename), weights_only=True))
     print("Loaded pretrained model.")
 else:
     print("Training new model...")
-    # Early stopping setup
-    early_stopper = EarlyStopping(patience=args.patience)
-    train_losses = []
-    val_losses = []
-
-    # Training loop
-    for epoch in range(args.num_epochs):
-        print(f"\nEpoch [{epoch + 1}/{args.num_epochs}]")
-        train_loss, train_acc = train(model, train_loader, optimizer, criterion, device)
-        val_loss, val_bal_acc, _, _ = evaluate(model, val_loader, criterion, device)
-
-        train_losses.append(train_loss)
-        val_losses.append(val_loss)
-
-        print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.2f}%")
-        print(f"Val   Loss: {val_loss:.4f}, Val Balanced Accuracy: {val_bal_acc:.2f}%")
-
-        if early_stopper.step(-val_loss, model):
-            print(f"\nEarly stopping triggered. Best Val Loss: {-early_stopper.best_score:.4f}")
-            break
-
-    model.load_state_dict(early_stopper.best_model_state)
-
-    os.makedirs(args.model_path, exist_ok=True)
-    torch.save(model.state_dict(), os.path.join(args.model_path, args.model_filename))
-    print(f"Best model saved to {os.path.join(args.model_path, args.model_filename)}")
-
-    # Plot training curves
+    model, train_losses, val_losses = train_with_early_stopping(
+        model, train_loader, val_loader, optimizer, criterion,
+        device, args.num_epochs, args.patience,
+        args.model_path, args.model_filename
+    )
     plot_loss(train_losses, val_losses)
 
-# Final evaluation
-test_loss, test_bal_acc, y_pred, y_true = evaluate(model, test_loader, criterion, device)
-print(f"\nTest Loss: {test_loss:.4f}, Test Balanced Accuracy: {test_bal_acc:.2f}%")
+# Evaluation on test set
+test_loss, test_bal_acc, detection_rate, neg_precision, cm, y_pred, y_true = evaluate(model, test_loader, criterion, device)
 
-# Plot results
-plot_confusion_matrix(y_true, y_pred, full_dataset_raw.classes)
+print(f"\nTest Balanced Accuracy: {test_bal_acc:.2f}%")
+print(f"Detection Rate (TN/N): {detection_rate:.2f}%")
+print(f"Negative Precision (TN/PN): {neg_precision:.2f}%")
+
+plot_confusion_matrix(cm, full_dataset_raw.classes)
 
 # Patch for GradCAM
 def forward_patch(x, **kwargs):
@@ -170,3 +149,5 @@ columns = ["CAM-DL", "CAM-IG", "DL-IG"]
 ssim_df = pd.DataFrame(ssim_rows, columns=columns, index=image_labels)
 pearson_df = pd.DataFrame(pearson_rows, columns=columns, index=image_labels)
 cosine_df = pd.DataFrame(cosine_rows, columns=columns, index=image_labels)
+
+plot_similarity_heatmaps(ssim_df, pearson_df, cosine_df)

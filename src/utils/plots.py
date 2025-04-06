@@ -14,8 +14,7 @@ def plot_loss(train, val):
     plt.tight_layout()
     plt.show()
 
-def plot_confusion_matrix(y_true, y_pred, class_names):
-    cm = confusion_matrix(y_true, y_pred)
+def plot_confusion_matrix(cm, class_names):
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
     disp.plot(cmap="Blues")
     plt.title("Confusion Matrix (Test Set)")
