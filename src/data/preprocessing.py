@@ -4,6 +4,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 import torch
 import numpy as np
 from transformers import AutoImageProcessor
+from PIL import Image
     
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, data, transform):
@@ -12,16 +13,17 @@ class CustomDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         img, label = self.data[idx]
-        # Pass the image directly to the transform function without using keyword 'images='
-        encoding = self.transform(img)  # Corrected here: just pass img
-        return encoding["pixel_values"].squeeze(0), label  # Remove batch dimension
+        encoding = self.transform(img)
+        return encoding["pixel_values"].squeeze(0), label
 
     def __len__(self):
         return len(self.data)
 
 def get_dataloaders_skin(dataset_path, batch_size):
     dataset = datasets.ImageFolder(dataset_path)
-    feature_extractor = AutoImageProcessor.from_pretrained("Anwarkh1/Skin_Cancer-Image_Classification", use_fast=True)
+    feature_extractor = AutoImageProcessor.from_pretrained("jhoppanne/SkinCancerClassifier_smote-V0")
+    mean = feature_extractor.image_mean
+    std = feature_extractor.image_std
 
     def transform_image(image):
         # Use feature extractor to transform the image, ensuring it's in the correct format
@@ -49,5 +51,7 @@ def get_dataloaders_skin(dataset_path, batch_size):
         DataLoader(train_ds, batch_size, shuffle=True),
         DataLoader(val_ds, batch_size, shuffle=False),
         DataLoader(test_ds, batch_size, shuffle=False),
-        dataset
+        dataset,
+        mean,
+        std
     )

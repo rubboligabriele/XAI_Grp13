@@ -5,10 +5,12 @@ import numpy as np
 from transformers import AutoModelForImageClassification
 
 def create_skin_cancer_model(dataset, learning_rate):
-    model_name = "Anwarkh1/Skin_Cancer-Image_Classification"
-    model = AutoModelForImageClassification.from_pretrained(model_name)
-    num_classes = 2
-    model.classifier = torch.nn.Linear(model.classifier.in_features, num_classes)
+    model_name = "jhoppanne/SkinCancerClassifier_smote-V0"
+    model = AutoModelForImageClassification.from_pretrained(
+        model_name,
+        num_labels=2,
+        ignore_mismatched_sizes=True
+    )
 
     targets = [label for _, label in dataset]
     class_weights = compute_class_weight("balanced", classes=np.unique(targets), y=targets)

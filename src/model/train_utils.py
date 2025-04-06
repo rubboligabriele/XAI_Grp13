@@ -15,8 +15,8 @@ def train(model, loader, optimizer, criterion, device):
 
         optimizer.zero_grad()
         outputs = model(images)
-        logits = outputs.logits  # Estrai i logits dal risultato del modello
-        loss = criterion(logits, labels)  # Usa i logits per il calcolo della loss
+        logits = outputs.logits
+        loss = criterion(logits, labels)
         loss.backward()
         optimizer.step()
 
@@ -42,8 +42,8 @@ def evaluate(model, loader, criterion, device):
         for images, labels in tqdm(loader, desc="Evaluating", leave=False):
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
-            logits = outputs.logits  # Estrai i logits dal risultato del modello
-            loss = criterion(logits, labels)  # Usa i logits per il calcolo della loss
+            logits = outputs.logits
+            loss = criterion(logits, labels)
 
             running_loss += loss.item()
             _, predicted = logits.max(1)
@@ -55,7 +55,7 @@ def evaluate(model, loader, criterion, device):
     return loss_avg, balanced_acc, all_preds, all_labels
 
 class EarlyStopping:
-    def __init__(self, patience=3):
+    def __init__(self, patience):
         self.patience = patience
         self.best_score = None
         self.counter = 0
