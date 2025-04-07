@@ -4,7 +4,7 @@ from tqdm import tqdm
 from sklearn.metrics import balanced_accuracy_score, confusion_matrix
 
 
-def train(model, loader, optimizer, criterion, device):
+def train(model, loader, optimizer, criterion, device, scheduler=None):
     model.train()
     running_loss = 0.0
     correct = 0
@@ -20,6 +20,9 @@ def train(model, loader, optimizer, criterion, device):
         loss = criterion(logits, labels)
         loss.backward()
         optimizer.step()
+
+        if scheduler is not None:
+            scheduler.step()
 
         running_loss += loss.item()
         _, predicted = logits.max(1)
@@ -54,16 +57,14 @@ def evaluate(model, loader, criterion, device):
     loss_avg = running_loss / len(loader)
     balanced_acc = balanced_accuracy_score(all_labels, all_preds) * 100.0
 
-    cm = confusion_matrix(all_labels, all_preds)
-    TN, FP, FN, TP = cm.ravel()
+    cm = confusion_matrix(all_labels, all_preds, labels=[1, 0])  # 1 = melanoma (positivo), 0 = naevus (negativo)
+    TP, FN, FP, TN = cm.ravel()
 
-    N = TN + FP
-    PN = TN + FN # All predicted negatives
+    precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
+    recall = TP / (TP + FN) if (TP + FN) > 0 else 0.0
+    f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
 
-    detection_rate = (TN / N) * 100.0 if N > 0 else 0.0
-    negative_precision = (TN / PN) * 100.0 if PN > 0 else 0.0
-
-    return loss_avg, balanced_acc, detection_rate, negative_precision, cm, all_preds, all_labels
+    return loss_avg, balanced_acc, precision, recall, f1, cm, all_preds, all_labels
 
 class EarlyStopping:
     def __init__(self, patience):
@@ -82,14 +83,15 @@ class EarlyStopping:
             self.counter += 1
             return self.counter >= self.patience
         
-def train_with_early_stopping(model, train_loader, val_loader, optimizer, criterion, device, num_epochs, patience, model_path, model_filename):
+def train_with_early_stopping(model, train_loader, val_loader, optimizer, criterion, device,
+                              num_epochs, patience, model_path, model_filename, scheduler=None):
     early_stopper = EarlyStopping(patience=patience)
     train_losses = []
     val_losses = []
 
     for epoch in range(num_epochs):
         print(f"\nEpoch [{epoch + 1}/{num_epochs}]")
-        train_loss, train_acc = train(model, train_loader, optimizer, criterion, device)
+        train_loss, train_acc = train(model, train_loader, optimizer, criterion, device, scheduler=scheduler)
         val_loss, val_bal_acc, *_ = evaluate(model, val_loader, criterion, device)
 
         train_losses.append(train_loss)

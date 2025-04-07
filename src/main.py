@@ -16,6 +16,7 @@ from scipy.stats import pearsonr
 from sklearn.metrics.pairwise import cosine_similarity
 from skimage.color import rgb2gray
 import pandas as pd
+from transformers import get_scheduler
 
 args = get_parser().parse_args()
 
@@ -33,19 +34,33 @@ if args.load_model:
     print("Loaded pretrained model.")
 else:
     print("Training new model...")
+
+    if args.use_scheduler:
+        total_training_steps = len(train_loader) * args.num_epochs
+        scheduler = get_scheduler(
+            "linear",
+            optimizer=optimizer,
+            num_warmup_steps=0,
+            num_training_steps=total_training_steps,
+        )
+    else:
+        scheduler = None
+
     model, train_losses, val_losses = train_with_early_stopping(
         model, train_loader, val_loader, optimizer, criterion,
         device, args.num_epochs, args.patience,
-        args.model_path, args.model_filename
+        args.model_path, args.model_filename,
+        scheduler=scheduler
     )
     plot_loss(train_losses, val_losses)
 
 # Evaluation on test set
-test_loss, test_bal_acc, detection_rate, neg_precision, cm, y_pred, y_true = evaluate(model, test_loader, criterion, device)
+test_loss, test_bal_acc, precision, recall, f1, cm, y_pred, y_true = evaluate(model, test_loader, criterion, device)
 
 print(f"\nTest Balanced Accuracy: {test_bal_acc:.2f}%")
-print(f"Detection Rate (TN/N): {detection_rate:.2f}%")
-print(f"Negative Precision (TN/PN): {neg_precision:.2f}%")
+print(f"Precision: {precision * 100:.2f}%")
+print(f"Recall: {recall * 100:.2f}%")
+print(f"F1 Score: {f1 * 100:.2f}%")
 
 plot_confusion_matrix(cm, full_dataset_raw.classes)
 

@@ -26,4 +26,5 @@ def get_parser():
     parser.add_argument('--batch_size', type=int, default=BATCH_SIZE, help="Batch size for data loaders")
     parser.add_argument('--model_path', type=str, default=MODEL_PATH, help="Directory where model weights are saved or loaded from")
     parser.add_argument('--learning_rate', type=float, default=LEARNING_RATE, help="Learning rate for the optimizer")
+    parser.add_argument('--use_scheduler', action='store_true', help="Enable learning rate scheduler (linear)")
     return parser

@@ -4,7 +4,6 @@ from sklearn.model_selection import StratifiedShuffleSplit
 import torch
 import numpy as np
 from transformers import AutoImageProcessor
-from PIL import Image
     
 class CustomDataset(torch.utils.data.Dataset):
     def __init__(self, data, transform):

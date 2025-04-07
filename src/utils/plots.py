@@ -14,9 +14,10 @@ def plot_loss(train, val):
     plt.tight_layout()
     plt.show()
 
-def plot_confusion_matrix(cm, class_names):
+def plot_confusion_matrix(cm, class_names, vmin=0, vmax=15):
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
     disp.plot(cmap="Blues")
+    disp.im_.set_clim(vmin, vmax)
     plt.title("Confusion Matrix (Test Set)")
     plt.show()
 
@@ -42,19 +43,26 @@ def plot_explainability_comparison(originals, cam_overlays, dl_overlays, ig_over
 def plot_similarity_heatmaps(ssim_df, pearson_df, cosine_df):
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
-    sns.heatmap(ssim_df, annot=True, cmap="Blues", fmt=".2f", ax=axes[0])
+    ssim_vmin, ssim_vmax = -0.1, 0.4
+    pearson_vmin, pearson_vmax = -0.7, 0.6
+    cosine_vmin, cosine_vmax = 0.4, 0.9
+
+    sns.heatmap(ssim_df, annot=True, cmap="Blues", fmt=".2f", ax=axes[0],
+            vmin=ssim_vmin, vmax=ssim_vmax)
     axes[0].set_title("SSIM Similarity")
     axes[0].set_xlabel("Pair")
     axes[0].set_ylabel("Image")
     axes[0].tick_params(axis='y', labelrotation=0)
 
-    sns.heatmap(pearson_df, annot=True, cmap="Reds", fmt=".2f", ax=axes[1])
+    sns.heatmap(pearson_df, annot=True, cmap="Reds", fmt=".2f", ax=axes[1],
+            vmin=pearson_vmin, vmax=pearson_vmax)
     axes[1].set_title("Pearson Correlation")
     axes[1].set_xlabel("Pair")
     axes[1].set_ylabel("")
     axes[1].tick_params(axis='y', labelrotation=0)
 
-    sns.heatmap(cosine_df, annot=True, cmap="Greens", fmt=".2f", ax=axes[2])
+    sns.heatmap(cosine_df, annot=True, cmap="Greens", fmt=".2f", ax=axes[2],
+            vmin=cosine_vmin, vmax=cosine_vmax)
     axes[2].set_title("Cosine Similarity")
     axes[2].set_xlabel("Pair")
     axes[2].set_ylabel("")
