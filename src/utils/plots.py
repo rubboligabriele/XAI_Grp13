@@ -70,3 +70,15 @@ def plot_similarity_heatmaps(ssim_df, pearson_df, cosine_df):
 
     plt.tight_layout()
     plt.show()
+
+def plot_jaccard_heatmap(jaccard_df):
+    plt.figure(figsize=(6, 5))
+
+    sns.heatmap(jaccard_df, annot=True, cmap="Purples", fmt=".2f",
+                    vmin=0.0, vmax=1.0, cbar_kws={'label': 'Jaccard Index'})
+        
+    plt.title("Jaccard Similarity (Model 1 vs Model 2)")
+    plt.xlabel("Explanation Method")
+    plt.ylabel("Image")
+    plt.tight_layout()
+    plt.show()

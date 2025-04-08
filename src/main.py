@@ -18,7 +18,10 @@ from skimage.color import rgb2gray
 import pandas as pd
 from transformers import get_scheduler
 
-args = get_parser().parse_args()
+parser = get_parser()
+args = parser.parse_args()
+if args.compare_models and not args.second_model_filename:
+    parser.error("--second_model_filename is required when --compare_models is set")
 
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -76,11 +79,8 @@ ig = IntegratedGradients(model)
 target_layer = model.efficientnet.encoder.top_conv
 cam = GradCAM(model=model, target_layers=[target_layer])
 
-original_images = []
-overlays = []
-deeplift_overlays = []
-ig_overlays = []
-titles = []
+original_images, overlays, deeplift_overlays, ig_overlays, titles = [], [], [], [], []
+grayscale_cams, deeplift_attrs, ig_attrs = [], [], []
 
 image_tensor = next(iter(test_loader))[0][:5]
 
@@ -94,7 +94,6 @@ for idx in range(5):
     img_np = img_denorm.permute(1, 2, 0).cpu().numpy()
     img_np = np.clip(img_np, 0, 1).astype(np.float32)
 
-    # Prediction
     model.eval()
     with torch.no_grad():
         logits = model(input_image)
@@ -105,21 +104,21 @@ for idx in range(5):
     grayscale_cam = cam(input_tensor=input_image, targets=[ClassifierOutputTarget(pred_class_idx)])[0]
     overlay = show_cam_on_image(img_np, grayscale_cam, use_rgb=True)
 
-    # DeepLIFT
+    # DeepLIFT & IG
     input_image.requires_grad_()
     baseline = torch.zeros_like(input_image).to(device)
     dl_attr = deeplift.attribute(input_image, baselines=baseline, target=pred_class_idx)
-    dl_overlay = attribution_to_grayscale(dl_attr)
-
-    #Integrated Gradients
     ig_attr = ig.attribute(input_image, baselines=baseline, target=pred_class_idx, n_steps=200)
-    ig_overlay = attribution_to_grayscale(ig_attr)
 
     original_images.append(img_np)
     overlays.append(overlay)
-    deeplift_overlays.append(dl_overlay)
-    ig_overlays.append(ig_overlay)
+    deeplift_overlays.append(attribution_to_grayscale(dl_attr))
+    ig_overlays.append(attribution_to_grayscale(ig_attr))
     titles.append(pred_class_name)
+
+    grayscale_cams.append(grayscale_cam)
+    deeplift_attrs.append(dl_attr.squeeze().detach().cpu().numpy())
+    ig_attrs.append(ig_attr.squeeze().detach().cpu().numpy())
 
 plot_explainability_comparison(original_images, overlays, deeplift_overlays, ig_overlays, titles)
 
@@ -129,15 +128,13 @@ cosine_rows = []
 image_labels = []
 
 for i in range(5):
+    cam_gray = grayscale_cams[i]
     dl = deeplift_overlays[i]
     ig = ig_overlays[i]
-    cam_rgb = overlays[i]
-    cam_gray = rgb2gray(cam_rgb)
 
-    # Flatten
-    dl_flat = dl.flatten()
-    ig_flat = ig.flatten()
-    cam_flat = cam_gray.flatten()
+    cam_flat = grayscale_cams[i].flatten()
+    dl_flat = deeplift_overlays[i].flatten()
+    ig_flat = ig_overlays[i].flatten()
 
     image_label = f"Img {i+1}"
     image_labels.append(image_label)
@@ -166,3 +163,45 @@ pearson_df = pd.DataFrame(pearson_rows, columns=columns, index=image_labels)
 cosine_df = pd.DataFrame(cosine_rows, columns=columns, index=image_labels)
 
 plot_similarity_heatmaps(ssim_df, pearson_df, cosine_df)
+
+if args.compare_models:
+    model2, _, _ = create_skin_cancer_model(full_dataset_raw, args.learning_rate)
+    model2.load_state_dict(torch.load(os.path.join(args.model_path, args.second_model_filename), weights_only=True))
+
+    def forward_patch_2(x, **kwargs):
+        return model2.__class__.forward(model2, pixel_values=x, **kwargs).logits
+    model2.forward = forward_patch_2
+
+    deeplift2 = DeepLift(model2)
+    ig2 = IntegratedGradients(model2)
+    target_layer2 = model2.efficientnet.encoder.top_conv
+    cam2 = GradCAM(model=model2, target_layers=[target_layer2])
+
+    grayscale_cams_2, deeplift_attrs_2, ig_attrs_2 = [], [], []
+
+    for idx in range(5):
+        input_image = image_tensor[idx].unsqueeze(0).to(device)
+        logits2 = model2(input_image)
+        pred_class_idx2 = logits2.argmax(dim=1).item()
+
+        model2.eval()
+        logits2 = model2(input_image)
+        pred_class_idx2 = logits2.argmax(dim=1).item()
+
+        grayscale_cam2 = cam2(input_tensor=input_image, targets=[ClassifierOutputTarget(pred_class_idx2)])[0]
+        dl_attr2 = deeplift2.attribute(input_image, baselines=baseline, target=pred_class_idx2)
+        ig_attr2 = ig2.attribute(input_image, baselines=baseline, target=pred_class_idx2, n_steps=200)
+
+        grayscale_cams_2.append(grayscale_cam2)
+        deeplift_attrs_2.append(dl_attr2.squeeze().detach().cpu().numpy())
+        ig_attrs_2.append(ig_attr2.squeeze().detach().cpu().numpy())
+
+    jaccard_rows = []
+    for i in range(5):
+        jaccard_cam = compute_jaccard_similarity(grayscale_cams[i], grayscale_cams_2[i])
+        jaccard_dl = compute_jaccard_similarity(deeplift_attrs[i], deeplift_attrs_2[i])
+        jaccard_ig = compute_jaccard_similarity(ig_attrs[i], ig_attrs_2[i])
+        jaccard_rows.append([jaccard_cam, jaccard_dl, jaccard_ig])
+
+    jaccard_df = pd.DataFrame(jaccard_rows, columns=["GradCAM", "DeepLIFT", "IG"], index=[f"Img {i+1}" for i in range(5)])
+    plot_jaccard_heatmap(jaccard_df)
