@@ -14,7 +14,6 @@ from utils.util_functions import *
 from skimage.metrics import structural_similarity as ssim
 from scipy.stats import pearsonr
 from sklearn.metrics.pairwise import cosine_similarity
-from skimage.color import rgb2gray
 import pandas as pd
 from transformers import get_scheduler
 
