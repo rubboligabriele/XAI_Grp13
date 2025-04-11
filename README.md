@@ -99,6 +99,16 @@ You can also customize the training behavior by adding the following optional ar
 
 ---
 
+## Pretrained Models
+
+You can download our two pretrained models from the following Google Drive link:
+
+🔗 [Download Pretrained Models](https://drive.google.com/drive/folders/1et9_-fvm_fqbsY4yEGtCkB_whoIahXy_?usp=sharing)
+
+After downloading, place the model files in the directory you will specify via the `--model_path` argument.
+
+---
+
 ## Credits
 
 - The pre-trained base model used is [`jhoppanne/SkinCancerClassifier_smote-V0`](https://huggingface.co/jhoppanne/SkinCancerClassifier_smote-V0) from Hugging Face.
