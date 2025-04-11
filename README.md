@@ -120,3 +120,9 @@ This project was developed as part of the *Trustworthy and Explainable AI* cours
 **Authors:**
 - Gabriele Rubboli Petroselli – g.rubboli.petroselli@student.rug.nl  
 - Thanos Bampes - a.bampes@student.rug.nl
+
+---
+
+## Use of Language Models
+
+OpenAI’s ChatGPT was used in this project for code cleaning, clarification, and style formatting. All generated content has been reviewed and validated by the authors.
