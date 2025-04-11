@@ -44,6 +44,7 @@ Through both qualitative visualizations and quantitative metrics, we aim to prov
         └── util_functions.py
 ```
 
+---
 
 ## Setup Environment
 
@@ -59,3 +60,47 @@ You can set up the project environment using **pip**.
    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu       # Torch for CPU
    pip install -r requirements.txt
    ```
+
+---
+
+## How to Run
+
+### Train a model from scratch:
+
+   ```bash
+   python src/main.py --model_filename <your_model_filename>.pt --model_path <your_model_folder> 
+   ```
+
+#### Optional training arguments:
+
+You can also customize the training behavior by adding the following optional arguments:
+
+| Argument           | Description                                                                 |
+|--------------------|-----------------------------------------------------------------------------|
+| `--num_epochs`     | Number of training epochs (default: `60`)                                   |
+| `--patience`       | Early stopping patience in epochs (default: `3`)                            |
+| `--batch_size`     | Batch size for training and validation loaders (default: `32`)              |
+| `--learning_rate`  | Learning rate for the optimizer (default: `0.00001`)                       |
+| `--use_scheduler`  | Enable learning rate scheduler (linear warmup)                              |
+
+### Evaluate a pretrained model:
+
+   ```bash
+   python src/main.py --load_model --model_filename <your_model_filename>.pt --model_path <your_model_folder>
+   ```
+
+### Compare explanations from two models:
+
+   ```bash
+   python src/main.py --load_model --model_filename <model_1_filename>.pt --model_path <your_model_folder> --compare_models --second_model_filename <model_2_filename>.pt
+   ```
+
+#### Make sure the dataset is located in the complete_mednode_dataset/ directory, structured with melanoma/ and naevus/ subfolders.
+
+---
+
+## Credits
+
+- The pre-trained base model used is [`jhoppanne/SkinCancerClassifier_smote-V0`](https://huggingface.co/jhoppanne/SkinCancerClassifier_smote-V0) from Hugging Face.
+- Explainability methods were implemented using [Captum](https://github.com/pytorch/captum) for DeepLIFT and Integrated Gradients.
+- GradCAM is implemented using the [pytorch-grad-cam](https://github.com/jacobgil/pytorch-grad-cam) library.
