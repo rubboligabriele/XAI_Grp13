@@ -102,5 +102,11 @@ You can also customize the training behavior by adding the following optional ar
 ## Credits
 
 - The pre-trained base model used is [`jhoppanne/SkinCancerClassifier_smote-V0`](https://huggingface.co/jhoppanne/SkinCancerClassifier_smote-V0) from Hugging Face.
-- Explainability methods were implemented using [Captum](https://github.com/pytorch/captum) for DeepLIFT and Integrated Gradients.
-- GradCAM is implemented using the [pytorch-grad-cam](https://github.com/jacobgil/pytorch-grad-cam) library.
+- Explainability methods were implemented using [`Captum`](https://github.com/pytorch/captum) for DeepLIFT and Integrated Gradients.
+- GradCAM is implemented using the [`pytorch-grad-cam`](https://github.com/jacobgil/pytorch-grad-cam) library.
+
+This project was developed as part of the *Trustworthy and Explainable AI* course at the **University of Groningen**.
+
+**Authors:**
+- Gabriele Rubboli Petroselli – g.rubboli.petroselli@student.rug.nl  
+- Thanos Bampes - a.bampes@student.rug.nl
