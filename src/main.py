@@ -39,6 +39,7 @@ else:
 
     if args.use_scheduler:
         total_training_steps = len(train_loader) * args.num_epochs
+        # Create a linear scheduler with no warmup
         scheduler = get_scheduler(
             "linear",
             optimizer=optimizer,
@@ -205,5 +206,6 @@ if args.compare_models:
         jaccard_ig = compute_jaccard_similarity(ig_attrs[i], ig_attrs_2[i])
         jaccard_rows.append([jaccard_cam, jaccard_dl, jaccard_ig])
 
+    # Create a DataFrame for Jaccard similarity
     jaccard_df = pd.DataFrame(jaccard_rows, columns=["GradCAM", "DeepLIFT", "IG"], index=[f"Img {i+1}" for i in range(5)])
     plot_jaccard_heatmap(jaccard_df)

@@ -14,16 +14,21 @@ def train(model, loader, optimizer, criterion, device, scheduler=None):
     for images, labels in progress_bar:
         images, labels = images.to(device), labels.to(device)
 
+        # Forward pass
         optimizer.zero_grad()
         outputs = model(images)
         logits = outputs.logits
         loss = criterion(logits, labels)
+
+        # Backward pass and optimization
         loss.backward()
         optimizer.step()
 
+        # Step the scheduler (if provided)
         if scheduler is not None:
             scheduler.step()
 
+        # Update metrics
         running_loss += loss.item()
         _, predicted = logits.max(1)
         total += labels.size(0)
@@ -58,9 +63,11 @@ def evaluate(model, loader, criterion, device):
     loss_avg = running_loss / len(loader)
     balanced_acc = balanced_accuracy_score(all_labels, all_preds) * 100.0
 
+    # Compute confusion matrix (labels: 1 = melanoma, 0 = naevus)
     cm = confusion_matrix(all_labels, all_preds, labels=[1, 0])  # 1 = melanoma, 0 = naevus
     TP, FN, FP, TN = cm.ravel()
 
+    # Compute precision, recall, and F1 score
     precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
     recall = TP / (TP + FN) if (TP + FN) > 0 else 0.0
     f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
@@ -74,8 +81,9 @@ def train_loop(model, train_loader, optimizer, criterion, device,
 
     for epoch in range(num_epochs):
         print(f"\nEpoch [{epoch + 1}/{num_epochs}]")
-        train_loss, train_acc = train(model, train_loader, optimizer, criterion, device, scheduler=scheduler)
-        
+
+        # Train for one epoch
+        train_loss, train_acc = train(model, train_loader, optimizer, criterion, device, scheduler=scheduler)       
         train_losses.append(train_loss)
 
         print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.2f}%")

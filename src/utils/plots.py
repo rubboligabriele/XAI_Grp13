@@ -73,8 +73,8 @@ def plot_similarity_heatmaps(ssim_df, pearson_df, cosine_df):
 
     plt.tight_layout()
     plt.show()
-
-
+    
+# Function to plot the Jaccard similarity heatmap
 def plot_jaccard_heatmap(jaccard_df):
     plt.figure(figsize=(6, 5))
 

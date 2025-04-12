@@ -12,6 +12,7 @@ from transformers import AutoModelForImageClassification
 
 def create_skin_cancer_model(dataset, learning_rate, freeze_backbone=False):
     model_name = "jhoppanne/SkinCancerClassifier_smote-V0"
+    # Load the model from Hugging Face, and fine-tune it for binary classification
     model = AutoModelForImageClassification.from_pretrained(
         model_name,
         num_labels=2,
