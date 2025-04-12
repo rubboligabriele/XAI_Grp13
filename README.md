@@ -77,10 +77,10 @@ You can also customize the training behavior by adding the following optional ar
 
 | Argument           | Description                                                                 |
 |--------------------|-----------------------------------------------------------------------------|
-| `--num_epochs`     | Number of training epochs (default: `50`)                                   |
-| `--batch_size`     | Batch size for training and validation loaders (default: `16`)              |
+| `--num_epochs`     | Number of training epochs (default: `58`)                                   |
+| `--batch_size`     | Batch size for training and test loaders (default: `32`)                    |
 | `--learning_rate`  | Learning rate for the optimizer (default: `0.00001`)                        |
-| `--use_scheduler`  | Enable learning rate scheduler (linear warmup)                              |
+| `--use_scheduler`  | Enable learning rate scheduler (linear)                                     |
 
 ### Evaluate a pretrained model:
 
