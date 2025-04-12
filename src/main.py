@@ -25,7 +25,7 @@ if args.compare_models and not args.second_model_filename:
 # Device configuration
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-train_loader, val_loader, test_loader, full_dataset_raw, mean, std = get_dataloaders_skin(DATASET_PATH, args.batch_size)
+train_loader, test_loader, full_dataset_raw, mean, std = get_dataloaders_skin(DATASET_PATH, args.batch_size)
 
 model, criterion, optimizer = create_skin_cancer_model(full_dataset_raw, args.learning_rate)
 
@@ -48,13 +48,13 @@ else:
     else:
         scheduler = None
 
-    model, train_losses, val_losses = train_with_early_stopping(
-        model, train_loader, val_loader, optimizer, criterion,
-        device, args.num_epochs, args.patience,
+    model, train_losses = train_loop(
+        model, train_loader, optimizer, criterion,
+        device, args.num_epochs,
         args.model_path, args.model_filename,
         scheduler=scheduler
     )
-    plot_loss(train_losses, val_losses)
+    plot_loss(train_losses)
 
 # Evaluation on test set
 test_loss, test_bal_acc, precision, recall, f1, cm, y_pred, y_true = evaluate(model, test_loader, criterion, device)
@@ -81,18 +81,20 @@ cam = GradCAM(model=model, target_layers=[target_layer])
 original_images, overlays, deeplift_overlays, ig_overlays, titles = [], [], [], [], []
 grayscale_cams, deeplift_attrs, ig_attrs = [], [], []
 
-image_tensor = next(iter(test_loader))[0][:5]
+# first 5 images of the test set
+image_tensor = next(iter(test_loader))[0][0:5]
 
 for idx in range(5):
     input_image = image_tensor[idx].unsqueeze(0).to(device)
 
-    # Denormalizzazione
+    # Denormalization for visualization
     img_denorm = image_tensor[idx].clone()
     for t, m, s in zip(img_denorm, mean, std):
         t.mul_(s).add_(m)
     img_np = img_denorm.permute(1, 2, 0).cpu().numpy()
     img_np = np.clip(img_np, 0, 1).astype(np.float32)
 
+    # Model prediction
     model.eval()
     with torch.no_grad():
         logits = model(input_image)
@@ -163,6 +165,7 @@ cosine_df = pd.DataFrame(cosine_rows, columns=columns, index=image_labels)
 
 plot_similarity_heatmaps(ssim_df, pearson_df, cosine_df)
 
+# Jaccard similarity for model comparison
 if args.compare_models:
     model2, _, _ = create_skin_cancer_model(full_dataset_raw, args.learning_rate)
     model2.load_state_dict(torch.load(os.path.join(args.model_path, args.second_model_filename), weights_only=True))

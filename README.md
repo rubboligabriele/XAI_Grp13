@@ -68,7 +68,7 @@ You can set up the project environment using **pip**.
 ### Train a model from scratch:
 
    ```bash
-   python src/main.py --model_filename <your_model_filename>.pt --model_path <your_model_folder> 
+   python src/main.py --model_filename <your_model_filename>.pth --model_path <your_model_folder> 
    ```
 
 #### Optional training arguments:
@@ -77,22 +77,21 @@ You can also customize the training behavior by adding the following optional ar
 
 | Argument           | Description                                                                 |
 |--------------------|-----------------------------------------------------------------------------|
-| `--num_epochs`     | Number of training epochs (default: `60`)                                   |
-| `--patience`       | Early stopping patience in epochs (default: `3`)                            |
-| `--batch_size`     | Batch size for training and validation loaders (default: `32`)              |
-| `--learning_rate`  | Learning rate for the optimizer (default: `0.00001`)                       |
+| `--num_epochs`     | Number of training epochs (default: `50`)                                   |
+| `--batch_size`     | Batch size for training and validation loaders (default: `16`)              |
+| `--learning_rate`  | Learning rate for the optimizer (default: `0.00001`)                        |
 | `--use_scheduler`  | Enable learning rate scheduler (linear warmup)                              |
 
 ### Evaluate a pretrained model:
 
    ```bash
-   python src/main.py --load_model --model_filename <your_model_filename>.pt --model_path <your_model_folder>
+   python src/main.py --load_model --model_filename <your_model_filename>.pth --model_path <your_model_folder>
    ```
 
 ### Compare explanations from two models:
 
    ```bash
-   python src/main.py --load_model --model_filename <model_1_filename>.pt --model_path <your_model_folder> --compare_models --second_model_filename <model_2_filename>.pt
+   python src/main.py --load_model --model_filename <model_1_filename>.pth --model_path <your_model_folder> --compare_models --second_model_filename <model_2_filename>.pth
    ```
 
 #### Make sure the dataset is located in the complete_mednode_dataset/ directory, structured with melanoma/ and naevus/ subfolders.

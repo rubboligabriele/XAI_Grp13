@@ -23,7 +23,8 @@ def create_skin_cancer_model(dataset, learning_rate, freeze_backbone=False):
         for name, param in model.named_parameters():
             param.requires_grad = name.startswith("classifier")
 
-    # Compute class weights for balanced loss
+    # Compute class weights to handle class imbalance in the dataset
+    # 'balanced' computes weights inversely proportional to class frequencies
     targets = [label for _, label in dataset]
     class_weights = compute_class_weight("balanced", classes=np.unique(targets), y=targets)
     class_weights = torch.tensor(class_weights, dtype=torch.float)

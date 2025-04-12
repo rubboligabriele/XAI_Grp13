@@ -22,7 +22,6 @@ def get_parser():
     parser.add_argument('--load_model', action='store_true', help="Load a pretrained model instead of training")
     parser.add_argument('--model_filename', type=str, required=True, help="Name of the model file to load/save")
     parser.add_argument('--num_epochs', type=int, default=NUM_EPOCHS, help="Number of training epochs")
-    parser.add_argument('--patience', type=int, default=PATIENCE, help="Early stopping patience")
     parser.add_argument('--batch_size', type=int, default=BATCH_SIZE, help="Batch size for data loaders")
     parser.add_argument('--model_path', type=str, required=True, help="Directory where model weights are saved or loaded from")
     parser.add_argument('--learning_rate', type=float, default=LEARNING_RATE, help="Learning rate for the optimizer")
@@ -32,12 +31,14 @@ def get_parser():
     return parser
 
 def compute_jaccard_similarity(map1, map2, percentile=90):
+    # Function to normalize the given matrix to range [0, 1]
     def normalize(m):
         m = m - np.min(m)
         if np.max(m) != 0:
             m = m / np.max(m)
         return m
 
+    # Function to binarize the matrix based on a given percentile threshold
     def binarize(m, p):
         threshold = np.percentile(m, p)
         return (m >= threshold).astype(int)
@@ -51,6 +52,7 @@ def compute_jaccard_similarity(map1, map2, percentile=90):
     intersection = np.logical_and(mask1, mask2).sum()
     union = np.logical_or(mask1, mask2).sum()
 
+    # If the union is zero (no overlap), return 0
     if union == 0:
         return 0.0
     return intersection / union

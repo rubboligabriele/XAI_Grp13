@@ -1,14 +1,14 @@
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import ConfusionMatrixDisplay
 import seaborn as sns
 
-def plot_loss(train, val):
+# Function to plot the training loss over epochs (only)
+def plot_loss(train):
     plt.figure(figsize=(8, 5))
     plt.plot(train, label="Train Loss", marker="o")
-    plt.plot(val, label="Validation Loss", marker="s")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
-    plt.title("Train vs Validation Loss")
+    plt.title("Train Loss")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
@@ -21,6 +21,7 @@ def plot_confusion_matrix(cm, class_names, vmin=0, vmax=15):
     plt.title("Confusion Matrix (Test Set)")
     plt.show()
 
+# Function to compare the explanation methods (GradCAM, DeepLIFT, Integrated Gradients) visually
 def plot_explainability_comparison(originals, cam_overlays, dl_overlays, ig_overlays, pred_classes):
     fig, axes = plt.subplots(len(originals), 4, figsize=(16, 4 * len(originals)))
 
@@ -40,9 +41,11 @@ def plot_explainability_comparison(originals, cam_overlays, dl_overlays, ig_over
     plt.tight_layout()
     plt.show()
 
+# Function to plot heatmaps comparing the similarity metrics (SSIM, Pearson, Cosine)
 def plot_similarity_heatmaps(ssim_df, pearson_df, cosine_df):
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
+    # Set color limits for each heatmap
     ssim_vmin, ssim_vmax = -0.1, 0.4
     pearson_vmin, pearson_vmax = -0.7, 0.6
     cosine_vmin, cosine_vmax = 0.4, 0.9
@@ -70,6 +73,7 @@ def plot_similarity_heatmaps(ssim_df, pearson_df, cosine_df):
 
     plt.tight_layout()
     plt.show()
+
 
 def plot_jaccard_heatmap(jaccard_df):
     plt.figure(figsize=(6, 5))
