@@ -76,6 +76,7 @@ model.forward = forward_patch
 deeplift = DeepLift(model)
 ig = IntegratedGradients(model)
 
+# Use the top convolution layer of EfficientNet as the target layer for GradCAM
 target_layer = model.efficientnet.encoder.top_conv
 cam = GradCAM(model=model, target_layers=[target_layer])
 
