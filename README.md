@@ -3,7 +3,7 @@
 ## Motivation and Description
 
 This project explores explainability in deep learning for melanoma classification. We compare different XAI methods (GradCAM, DeepLIFT, Integrated Gradients) applied to an EfficientNet-based model, pre-trained on dermoscopic images.
-We fine-tune this model on a small dataset (170 samples) of dermoscopic images collected at UMCG, focusing on binary classification (melanoma vs. benign).
+We fine-tune this model on a small dataset (170 samples) of non-dermoscopic images collected at UMCG, focusing on binary classification (melanoma vs. benign).
 
 The aim is to obtain a reliable and calibrated classifier and evaluate how stable and trustworthy the explanations are, both within the same model and across different models. We analyze the alignment between methods by comparing their explanation heatmaps using multiple similarity metrics (SSIM, Pearson correlation, Cosine similarity, and Jaccard index). This allows us to assess whether different XAI techniques agree on which regions of the image are most relevant for the model’s prediction, and whether such explanations remain consistent across models with similar performance but different generalization behaviors.
 
