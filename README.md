@@ -5,7 +5,7 @@
 This project explores explainability in deep learning for melanoma classification. We compare different XAI methods (GradCAM, DeepLIFT, Integrated Gradients) applied to an EfficientNet-based model, pre-trained on dermoscopic images.
 We fine-tune this model on a small dataset (170 samples) of non-dermoscopic images collected at UMCG, focusing on binary classification (melanoma vs. benign).
 
-The aim is to obtain a reliable and calibrated classifier and evaluate how stable and trustworthy the explanations are, both within the same model and across different models. We analyze the alignment between methods by comparing their explanation heatmaps using multiple similarity metrics (SSIM, Pearson correlation, Cosine similarity, and Jaccard index). This allows us to assess whether different XAI techniques agree on which regions of the image are most relevant for the model’s prediction, and whether such explanations remain consistent across models with similar performance but different generalization behaviors.
+The aim is to obtain a reliable and calibrated classifier and evaluate how stable and trustworthy the explanations are, both within the same model and across different models. We analyze the alignment between methods by comparing their explanation heatmaps using multiple similarity metrics (SSIM, Pearson correlation, Cosine similarity, and Jaccard similarity). This allows us to assess whether different XAI techniques agree on which regions of the image are most relevant for the model’s prediction, and whether such explanations remain consistent across models with similar performance but different generalization behaviors.
 
 Through both qualitative visualizations and quantitative metrics, we aim to provide insights into the robustness and interpretability of deep learning models in the context of medical diagnosis.
 
@@ -17,7 +17,7 @@ Through both qualitative visualizations and quantitative metrics, we aim to prov
 - Training/fine-tuning and evaluation of a EfficientNet model
 - Explanation of predictions via GradCAM, DeepLIFT, and Integrated Gradients
 - Visual and quantitative comparison of the explanation heatmaps
-- Similarity metrics: SSIM, Pearson Correlation, Cosine Similarity, Jaccard Index
+- Similarity metrics: SSIM, Pearson Correlation, Cosine Similarity, Jaccard Similarity
 - Model comparison mode to assess robustness and comparability of explanations across different models
 
 ---
